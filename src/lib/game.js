@@ -1,7 +1,13 @@
 import readline from 'readline';
 import chalk from 'chalk';
 
-//sample trivia questions
+// trivia questions
+//has an array of question objects
+//each object has:
+//question: the text question
+//choices: possible answers
+//answer: expected output
+//explanation: will be shown if the expected output is not correct
 const questions = [
     {
         question: "What does 'www' stand for in a website address?",
@@ -41,13 +47,14 @@ const questions = [
     }
 ]
 //Defining the variables
-let score = 0;
-let index = 0; //first question
-let timeLeft = 600; //total game time in minutes
-let timer
+let score = 0; //tracks score
+let index = 0; //tracks current question
+let timeLeft = 600; //total game time in seconds (10 minutes)
+let timer;
 
+// Start the game - handles user selection
 export function startGame() {
-    console.log("\n=== Trivia Game ===");
+    console.log("\n=== Trivia Game ==="); 
     console.log("1. Start the game");
     console.log("2. Quit");
 
@@ -55,7 +62,7 @@ export function startGame() {
         const choice = input.trim();
 
         if (choice === "1") {
-            console.log("\nStarting game...\n");
+            console.log("\nStarting game...\n"); //selecting 1, proceed to the questions in the game
 
             score = 0;
             index = 0;
@@ -64,49 +71,55 @@ export function startGame() {
             startTimer();
             showQuestion();
 
-        } else if (choice === "2") {
+        } else if (choice === "2") { //selecting a 2 means quitting
             console.log("Goodbye!");
             rl.close();
 
         } else {
-            console.log("Invalid option. Please choose 1 or 2.");
+            console.log("Invalid option. Please choose 1 or 2."); //select a correct option
             startGame();
         }
     });
 }
 
+//Timer
 function startTimer() {
     timer = setInterval(() => { //setting the timer
         timeLeft--; //time decreases by 1
         if (timeLeft <= 0) {
-            //stop the interval is time left is 0
+            //stop the interval if time left is 0
             console.log(chalk.red("\nTime is up!"));
             endGame();
         }
-    }, 1000); //run the function every 1000 milliseconds
+    }, 1000); //runs the function every 1000 milliseconds
 }
+//Readline interface- handles user input/output in the terminal
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
 
-
-//list the questions sequentially
+//List the questions sequentially 
+//Displays questions and all the choices
+//Moves to end game if there are no more questions
 function showQuestion() {
     if (index >= questions.length) {
         return endGame();
     }
     const q = questions[index];
-    console.log(chalk.blue(`\nQuestion ${index + 1}: ${q.question}`));
-    q.choices.map(choice => console.log(choice));
-    rl.question("\nEnter your answer (A/B/C): ", (answer) => {
+    console.log(chalk.blue(`\nQuestion ${index + 1}: ${q.question}`)); //question
+    q.choices.map(choice => console.log(choice)); //choices
+    rl.question("\nEnter your answer (A/B/C): ", (answer) => { //user input
         checkAnswer(answer);
     });
 }
+//Check if answer is correct
+//if answer is correct score increases
+//if answer is wrong, it shows the correct answer and explanation (logic behind the answer)
 function checkAnswer(answer) {
     const q = questions[index];
 
-    if (answer.toUpperCase() === q.answer) {
+    if (answer.toUpperCase() === q.answer) { //if answer is in lowercase, converts to Uppercase and validates if correct
         console.log(chalk.green("Correct!\n"));
         score++;
     } else {
@@ -115,10 +128,10 @@ function checkAnswer(answer) {
     index++;
     showQuestion();
 }
-
+//End Game
 async function endGame() {
-    clearInterval(timer);
+    clearInterval(timer); //stops timer
     console.log(chalk.magenta("Game is Over!"));
-    console.log(chalk.magenta(`Your score is: ${score}/${questions.length}`));
-    rl.close();
+    console.log(chalk.magenta(`Your score is: ${score}/${questions.length}`)); //Displays final score
+    rl.close(); //closes the readline interface
 }
